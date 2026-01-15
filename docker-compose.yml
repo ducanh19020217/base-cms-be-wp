@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: wp_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wp_app
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'JWT_AUTH_SECRET_KEY', 'your-top-secret-key-here-make-it-long-and-random' );
+        define( 'JWT_AUTH_CORS_ENABLE', true );
+    volumes:
+      - .:/var/www/html
+
+  cli:
+    image: wordpress:cli
+    container_name: wp_cli
+    user: "1000:1000"
+    volumes:
+      - .:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress
+    depends_on:
+      - db
+      - wordpress
+
+volumes:
+  db_data:
