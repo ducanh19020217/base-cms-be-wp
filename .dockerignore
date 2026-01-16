@@ -1,0 +1,9 @@
+wp-admin
+wp-includes
+node_modules
+frontend
+uploads
+.git
+.gitignore
+*.log
+.env

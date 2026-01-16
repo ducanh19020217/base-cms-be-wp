@@ -1,49 +1,38 @@
-version: '3.8'
-
 services:
   db:
-    image: mysql:8.0
-    container_name: wp_db
+    image: mariadb:11
+    container_name: wp-db-1
     restart: always
+    env_file:
+      - .env
     environment:
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress_password
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d
 
   wordpress:
-    image: wordpress:latest
-    container_name: wp_app
+    build: .
+    container_name: wp-backend-1
     restart: always
-    ports:
-      - "8082:80"
-    environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress_password
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_CONFIG_EXTRA: |
-        define( 'JWT_AUTH_SECRET_KEY', 'your-top-secret-key-here-make-it-long-and-random' );
-        define( 'JWT_AUTH_CORS_ENABLE', true );
-    volumes:
-      - .:/var/www/html
-
-  cli:
-    image: wordpress:cli
-    container_name: wp_cli
-    user: "1000:1000"
-    volumes:
-      - .:/var/www/html
-    environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress_password
-      WORDPRESS_DB_NAME: wordpress
     depends_on:
       - db
-      - wordpress
+    ports:
+      - "6060:80"
+    env_file:
+      - .env
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WP_HOME: ${WP_HOME}
+    volumes:
+      - wp_uploads:/var/www/html/wp-content/uploads
 
 volumes:
   db_data:
+  wp_uploads:
