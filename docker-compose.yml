@@ -13,13 +13,20 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./db-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   wordpress:
+    image: ${DOCKER_USERNAME:-your-dockerhub-username}/wordpress-backend:${VERSION:-latest}
     build: .
     container_name: wp-backend-1
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "6060:80"
     env_file:
@@ -32,6 +39,29 @@ services:
       WP_HOME: ${WP_HOME}
     volumes:
       - wp_uploads:/var/www/html/wp-content/uploads
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost/wp-json" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    image: ${DOCKER_USERNAME:-your-dockerhub-username}/nextjs-frontend:${VERSION:-latest}
+    build: ./frontend
+    container_name: nextjs-app
+    restart: always
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env.production
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   db_data:

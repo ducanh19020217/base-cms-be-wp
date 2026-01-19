@@ -1,9 +1,50 @@
-wp-admin
-wp-includes
-node_modules
-frontend
-uploads
+# Git
 .git
 .gitignore
-*.log
+.gitattributes
+
+# Environment files
 .env
+.env.*
+*.env
+
+# Documentation
+README.md
+DEPLOYMENT.md
+
+# Scripts
+scripts/
+
+# Database backups
+*.sql
+*.tar.gz
+*.zip
+backups/
+
+# Node modules
+node_modules/
+frontend/node_modules/
+
+# Next.js build
+frontend/.next/
+frontend/out/
+
+# IDE and OS
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# WordPress cache
+wp-content/cache/
+wp-content/upgrade/
+
+# Test files
+test_auth.php
+check-wp.php
